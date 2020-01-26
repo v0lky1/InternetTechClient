@@ -27,7 +27,6 @@ public class Client {
         Socket socket;
 
         socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-        System.out.println("TEST");
 
         waitForServer = true;
         validUsername = false;
@@ -35,7 +34,7 @@ public class Client {
         receiveThread = new ReceiveThread(this, socket);
         receiveThread.start();
 
-        sendThread = new SendThread(this, socket);
+        sendThread = new SendThread(socket);
         sendThread.start();
 
 

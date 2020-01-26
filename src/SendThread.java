@@ -6,12 +6,11 @@ import java.net.Socket;
 public class SendThread extends Thread {
 
     private Socket socket;
-    private Client client;
+
     private OutputStream outputStream;
     private PrintWriter writer;
 
-    public SendThread(Client client, Socket socket) {
-        this.client = client;
+    public SendThread(Socket socket) {
         this.socket = socket;
     }
 
