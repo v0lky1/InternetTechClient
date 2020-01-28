@@ -6,7 +6,6 @@ import java.net.Socket;
 public class SendThread extends Thread {
 
     private Socket socket;
-
     private OutputStream outputStream;
     private PrintWriter writer;
 
@@ -24,6 +23,7 @@ public class SendThread extends Thread {
     }
 
     public void sendMessage(String message) {
+        System.err.println("OUT\t >> " + message);
         writer.println(message);
         writer.flush();
     }

@@ -9,8 +9,8 @@ public class Client {
 
     private ReceiveThread receiveThread;
     private SendThread sendThread;
+    private String msgType;
     private boolean validUsername;
-    private boolean waitForServer;
     protected boolean pressedQ;
 
     public static void main(String[] args) {
@@ -28,7 +28,7 @@ public class Client {
 
         socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
 
-        waitForServer = true;
+
         validUsername = false;
 
         receiveThread = new ReceiveThread(this, socket);
@@ -37,13 +37,17 @@ public class Client {
         sendThread = new SendThread(socket);
         sendThread.start();
 
+//
+//        while (!validUsername) {
+//            if (!waitForServer) {
+//                String username = setUsername();
+//                waitForServer = true;
+//                sendThread.sendMessage("HELO " + username);
+//            }
+//        }
 
-        while (!validUsername) {
-            if (!waitForServer) {
-                String username = setUsername();
-                waitForServer = true;
-                sendThread.sendMessage("HELO " + username);
-            }
+        while(msgType.equals("HELO")){
+
         }
 
         System.out.println("Username OK, go send your messages!");
@@ -73,7 +77,7 @@ public class Client {
         }
     }
 
-    private String setUsername() {
+    protected String setUsername() {
         System.out.print("Enter your preferred username: ");
 
         return scanner.nextLine();
@@ -91,7 +95,7 @@ public class Client {
         return validUsername;
     }
 
-    public void setWaitForServer(boolean waitForServer) {
-        this.waitForServer = waitForServer;
+    public void sendMessage(String message){
+        sendThread.sendMessage(message);
     }
 }

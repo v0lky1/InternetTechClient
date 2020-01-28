@@ -12,7 +12,8 @@ public class ReceiveThread extends Thread {
     private String line;
     private Client client;
 
-    public ReceiveThread(Client client, Socket socket){
+
+    public ReceiveThread(Client client, Socket socket) {
         this.client = client;
         this.socket = socket;
     }
@@ -32,7 +33,7 @@ public class ReceiveThread extends Thread {
                 e.printStackTrace();
             }
 
-            if (line != null){
+            if (line != null) {
                 handleIncomingMessage(line);
             }
 
@@ -41,13 +42,13 @@ public class ReceiveThread extends Thread {
 
     }
 
-    public void handleIncomingMessage(String line){
-        System.out.println("INCOMING MESSAGE: " + line);
+    public void handleIncomingMessage(String line) {
+        System.out.println("IN \t << " + line);
         String[] incomingMessage = line.split(" ", 2);
 
-        switch (incomingMessage[0]){
+        switch (incomingMessage[0]) {
             case "HELO":
-                client.setWaitForServer(false);
+                receivedMessage("HELO");
                 break;
 
             case "+OK":
@@ -56,7 +57,7 @@ public class ReceiveThread extends Thread {
 
             case "-ERR":
                 System.err.println("\n" + incomingMessage[1]);
-                handleErrorMessages(line);
+                //todo handle error msg
                 break;
 
             case "PING":
@@ -68,16 +69,13 @@ public class ReceiveThread extends Thread {
         }
     }
 
-    public void handleOkMessages(String line){
-        if (line.startsWith("HELO")){
+    public void handleOkMessages(String line) {
+        if (line.startsWith("HELO")) {
             client.setValidUsername(true);
-            client.setWaitForServer(true);
         }
     }
 
-    public void handleErrorMessages(String line){
-        if (line.startsWith("HELO")){
-            client.setWaitForServer(false);
-        }
+    public String receivedMessage(String type){
+        return type;
     }
 }
