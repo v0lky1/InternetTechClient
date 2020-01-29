@@ -9,7 +9,7 @@ public class SendThread extends Thread {
     private OutputStream outputStream;
     private PrintWriter writer;
 
-    public SendThread(Socket socket) {
+    SendThread(Socket socket) {
         this.socket = socket;
     }
 

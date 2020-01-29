@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class Client {
     private Scanner scanner = new Scanner(System.in);
@@ -9,9 +10,13 @@ public class Client {
 
     private ReceiveThread receiveThread;
     private SendThread sendThread;
-    private String msgType;
-    private boolean validUsername;
-    protected boolean pressedQ;
+    private boolean validUsername = false;
+    private Socket socket;
+    private String currentState;
+    private String[] incomingMessage;
+
+
+    private Stack<String> toBeHandled = new Stack<>();
 
     public static void main(String[] args) {
         try {
@@ -23,36 +28,83 @@ public class Client {
 
 
     private void run() throws IOException {
-        pressedQ = false;
-        Socket socket;
 
-        socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
+        setup();
 
+        while (!validUsername) {
+            if (!toBeHandled.empty()) {
+                incomingMessage = toBeHandled.pop().split(" ", 2);
+                currentState = incomingMessage[0];
 
-        validUsername = false;
+                //testing stuff
+                System.out.println(currentState);
+                //-----------------------
 
-        receiveThread = new ReceiveThread(this, socket);
-        receiveThread.start();
+                //Switch to handle the username request
+                //If we manage to get out of here we have a proper username and can start chatting
+                switch (currentState) {
+                    case "HELO":
+                        setUsername();
+                        break;
 
-        sendThread = new SendThread(socket);
-        sendThread.start();
+                    case "+OK":
+                        if (incomingMessage[1].startsWith("HELO")) {
+                            setValidUsername(true);
+                        }
+                        break;
 
-//
-//        while (!validUsername) {
-//            if (!waitForServer) {
-//                String username = setUsername();
-//                waitForServer = true;
-//                sendThread.sendMessage("HELO " + username);
-//            }
-//        }
+                    case "-ERR":
+                        if (incomingMessage[1].startsWith("user already logged in")) {
+                            System.out.println("That user is already logged in! Try a different account!");
+                            setUsername();
+                        } else if (incomingMessage[1].startsWith("username has an invalid format")) {
+                            System.out.println("That username is invalid! only characters, numbers and underscores are allowed!");
+                            setUsername();
+                        }
+                        break;
+                }
 
-        while(msgType.equals("HELO")){
-
+            }
         }
 
-        System.out.println("Username OK, go send your messages!");
-        while (!pressedQ) {
+        while (true) {
+            String message = scanner.nextLine();
+            sendThread.sendMessage("BCST " + message);
 
+            if (!toBeHandled.empty()) {
+                incomingMessage = toBeHandled.pop().split(" ", 2);
+                currentState = incomingMessage[0];
+
+                //TESTING STUFF
+                System.out.println(currentState);
+                //------------------------------
+
+                switch (currentState) {
+                    case "+OK":
+                        if (incomingMessage[1].startsWith("BCST")){
+                            System.out.println("HERE");
+                        }
+                    case "BCST":
+                        System.out.println(incomingMessage[1]);
+
+                }
+                break;
+            }
+        }
+    }
+
+    private void setUsername() {
+        System.out.println("Enter your preferred username: ");
+        String username = scanner.nextLine();
+        sendThread.sendMessage("HELO " + username);
+    }
+
+    public void pingReceived() {
+        sendThread.sendMessage("PONG");
+    }
+
+    private void chatAway() throws IOException {
+        while (true) {
             String message = scanner.nextLine();
 
             if (message.startsWith("/")) {
@@ -68,7 +120,7 @@ public class Client {
                 switch (command[0].toUpperCase()) {
                     case "Q":
                         sendThread.sendMessage("QUIT");
-                        pressedQ = true;
+                        socket.close();
                         break;
                 }
             } else {
@@ -77,25 +129,22 @@ public class Client {
         }
     }
 
-    protected String setUsername() {
-        System.out.print("Enter your preferred username: ");
+    private void setup() throws IOException {
 
-        return scanner.nextLine();
-    }
+        socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
 
-    public void pingReceived() {
-        sendThread.sendMessage("PONG");
+        receiveThread = new ReceiveThread(this, socket);
+        receiveThread.start();
+
+        sendThread = new SendThread(socket);
+        sendThread.start();
     }
 
     public void setValidUsername(boolean validUsername) {
         this.validUsername = validUsername;
     }
 
-    public boolean hasValidUsername() {
-        return validUsername;
-    }
-
-    public void sendMessage(String message){
-        sendThread.sendMessage(message);
+    void addToBeHandled(String message) {
+        toBeHandled.push(message);
     }
 }

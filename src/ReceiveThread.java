@@ -13,7 +13,7 @@ public class ReceiveThread extends Thread {
     private Client client;
 
 
-    public ReceiveThread(Client client, Socket socket) {
+    ReceiveThread(Client client, Socket socket) {
         this.client = client;
         this.socket = socket;
     }
@@ -26,7 +26,7 @@ public class ReceiveThread extends Thread {
         }
         reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        while (!client.pressedQ) {
+        while (true) {
             try {
                 line = reader.readLine();
             } catch (IOException e) {
@@ -43,39 +43,30 @@ public class ReceiveThread extends Thread {
     }
 
     public void handleIncomingMessage(String line) {
-        System.out.println("IN \t << " + line);
-        String[] incomingMessage = line.split(" ", 2);
 
-        switch (incomingMessage[0]) {
-            case "HELO":
-                receivedMessage("HELO");
-                break;
 
-            case "+OK":
-                handleOkMessages(incomingMessage[1]);
-                break;
 
-            case "-ERR":
-                System.err.println("\n" + incomingMessage[1]);
-                //todo handle error msg
-                break;
-
-            case "PING":
-                client.pingReceived();
-                break;
-
-            case "BCST":
-                System.out.println(incomingMessage[1]);
-        }
+        client.addToBeHandled(line);
     }
 
-    public void handleOkMessages(String line) {
-        if (line.startsWith("HELO")) {
-            client.setValidUsername(true);
-        }
-    }
-
-    public String receivedMessage(String type){
-        return type;
-    }
+//        switch (incomingMessage[0]) {
+//            case "HELO":
+//                client.setConnectionEstablished(true);
+//                break;
+//
+//            case "+OK":
+//                client.setValidUsername(true);
+//                break;
+//
+//            case "-ERR":
+//                client.setConnectionEstablished(false);
+//                break;
+//
+//            case "PING":
+//                client.pingReceived();
+//                break;
+//
+//            case "BCST":
+//                System.out.println(incomingMessage[1]);
+//        }
 }
