@@ -14,6 +14,7 @@ public class Client {
     private Socket socket;
     private String currentState;
     private String[] incomingMessage;
+    private String username;
 
 
     private Stack<String> toBeHandled = new Stack<>();
@@ -35,68 +36,61 @@ public class Client {
             if (!toBeHandled.empty()) {
                 incomingMessage = toBeHandled.pop().split(" ", 2);
                 currentState = incomingMessage[0];
-
-                //testing stuff
-                System.out.println(currentState);
-                //-----------------------
-
-                //Switch to handle the username request
-                //If we manage to get out of here we have a proper username and can start chatting
-                switch (currentState) {
-                    case "HELO":
-                        setUsername();
-                        break;
-
-                    case "+OK":
-                        if (incomingMessage[1].startsWith("HELO")) {
-                            setValidUsername(true);
-                        }
-                        break;
-
-                    case "-ERR":
-                        if (incomingMessage[1].startsWith("user already logged in")) {
-                            System.out.println("That user is already logged in! Try a different account!");
-                            setUsername();
-                        } else if (incomingMessage[1].startsWith("username has an invalid format")) {
-                            System.out.println("That username is invalid! only characters, numbers and underscores are allowed!");
-                            setUsername();
-                        }
-                        break;
-                }
-
             }
         }
 
+
+//
+//                    case "-ERR":
+//                        if (incomingMessage[1].startsWith("user already logged in")) {
+//                            System.out.println("That user is already logged in! Try a different account!");
+//                            setUsername();
+//                        } else if (incomingMessage[1].startsWith("username has an invalid format")) {
+//                            System.out.println("That username is invalid! only characters, numbers and underscores are allowed!");
+//                            setUsername();
+//                        }
+//                        break;
+//                }
+
+
         while (true) {
-            String message = scanner.nextLine();
-            sendThread.sendMessage("BCST " + message);
 
-            if (!toBeHandled.empty()) {
-                incomingMessage = toBeHandled.pop().split(" ", 2);
-                currentState = incomingMessage[0];
+            String toBeSent = scanner.nextLine();
+            sendThread.sendMessage("BCST " + toBeSent);
 
-                //TESTING STUFF
-                System.out.println(currentState);
-                //------------------------------
 
-                switch (currentState) {
-                    case "+OK":
-                        if (incomingMessage[1].startsWith("BCST")){
-                            System.out.println("HERE");
-                        }
-                    case "BCST":
-                        System.out.println(incomingMessage[1]);
-
-                }
-                break;
-            }
+//            String message = scanner.nextLine();
+//            sendThread.sendMessage("BCST " + message);
+//
+//            if (!toBeHandled.empty()) {
+//                incomingMessage = toBeHandled.pop().split(" ", 2);
+//                currentState = incomingMessage[0];
+//
+//                //TESTING STUFF
+//                System.out.println(currentState);
+//                //------------------------------
+//
+//                switch (currentState) {
+//                    case "+OK":
+//                        if (incomingMessage[1].startsWith("BCST")){
+//                            System.out.println("HERE");
+//                        }
+//                    case "BCST":
+//                        System.out.println(incomingMessage[1]);
+//                }
+//                break;
+//            }
         }
     }
 
-    private void setUsername() {
+    public void setUsername() {
         System.out.println("Enter your preferred username: ");
-        String username = scanner.nextLine();
+        username = scanner.nextLine();
         sendThread.sendMessage("HELO " + username);
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public void pingReceived() {

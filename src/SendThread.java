@@ -23,7 +23,7 @@ public class SendThread extends Thread {
     }
 
     public void sendMessage(String message) {
-        System.err.println("OUT\t >> " + message);
+        System.err.println("\tOUT\t >> " + message);
         writer.println(message);
         writer.flush();
     }
