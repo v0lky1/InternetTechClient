@@ -19,6 +19,7 @@ public class ReceiveThread extends Thread {
     }
 
     public void run() {
+
         try {
             inputStream = socket.getInputStream();
         } catch (IOException e) {
@@ -26,7 +27,7 @@ public class ReceiveThread extends Thread {
         }
         reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        while (true) {
+        while (!client.isStopped()) {
             try {
                 line = reader.readLine();
             } catch (IOException e) {
@@ -58,7 +59,7 @@ public class ReceiveThread extends Thread {
 
         switch (state) {
             case "HELO":
-                client.setUsername();
+                client.setNeedsUsername(true);
                 break;
 
             case "+OK":
@@ -73,7 +74,7 @@ public class ReceiveThread extends Thread {
                 //and have to do the same logic when triggered
                 if (misc.startsWith("user")) {
                     System.err.println("Error: " + misc);
-                    client.setUsername();
+                    client.setNeedsUsername(true);
                 }
                 break;
 
@@ -89,6 +90,11 @@ public class ReceiveThread extends Thread {
 
             case "PING":
                 client.pingReceived();
+                break;
+
+            case "DSCN":
+                client.disconnect();
+                break;
         }
 
 //        switch (incomingMessage[0]) {
