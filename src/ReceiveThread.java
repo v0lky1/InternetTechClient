@@ -37,10 +37,7 @@ public class ReceiveThread extends Thread {
             if (line != null) {
                 handleIncomingMessage(line);
             }
-
         }
-
-
     }
 
     public void handleIncomingMessage(String line) {
@@ -96,26 +93,5 @@ public class ReceiveThread extends Thread {
                 client.disconnect();
                 break;
         }
-
-//        switch (incomingMessage[0]) {
-//            case "HELO":
-//                client.setConnectionEstablished(true);
-//                break;
-//
-//            case "+OK":
-//                client.setValidUsername(true);
-//                break;
-//
-//            case "-ERR":
-//                client.setConnectionEstablished(false);
-//                break;
-//
-//            case "PING":
-//                client.pingReceived();
-//                break;
-//
-//            case "BCST":
-//                System.out.println(incomingMessage[1]);
-//        }
     }
 }

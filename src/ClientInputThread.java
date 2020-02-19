@@ -8,6 +8,13 @@ public class ClientInputThread extends Thread {
     private boolean validUsername;
     private String username;
 
+    /**
+     * the message sender thread, solely responsible for talking to the sendThread class to get messages across.
+     * We stumbled upon some issues regarding race-conditions and certain message-processing functionality that
+     * made the program synchronous.
+     * @param client makes sure we can tell the client what state he's in
+     * @param sendThread is here because it's the thread responsible for getting our messages to the server
+     */
     public ClientInputThread(Client client, SendThread sendThread) {
         this.client = client;
         this.sendThread = sendThread;
@@ -17,35 +24,39 @@ public class ClientInputThread extends Thread {
     }
 
     public void run() {
-        while (!validUsername && !client.isStopped()){
+        //if nothing stopped our client and username is not valid we need a username.
+        while (!validUsername && !client.isStopped()) {
+            //??? @Graggor explain this one plz
             if (needsUsername) {
                 needsUsername = false;
                 setUsername();
             }
         }
 
-        while(validUsername && !client.isStopped()){
+        //if nothing stopped our client and our username is valid we can start entering commands
+        while (validUsername && !client.isStopped()) {
+
             //username is valid so set it in client
             client.setUsername(username);
+
             String message = scanner.nextLine();
+            boolean bcst = true;
 
-            if (message.startsWith("/")) {
-                //removing the / because we know a command has been given
-                //and we're in this if
-                message = message.substring(1);
-                //limit 2 because this would always we force the user
-                //to type command " " parameter.
-                String[] command = message.split(" ", 2);
-
-                //forcing uppercase so we dont have to deal with
-                //lower case examples
-                switch (command[0].toUpperCase()) {
-                    case "Q":
-                        sendThread.sendMessage("QUIT");
+            //going through all the chat commands to figure out whether its a bcst message or not
+            //breaks because otherwise it'll send the message a kazillion times
+            //refer to Client.CHAT_COMMANDS for the options
+            for (String command : Client.CHAT_COMMANDS) {
+                if (message.startsWith(command)) {
+                    bcst = false;
+                    sendThread.sendMessage(message);
+                    if (message.startsWith("QUIT")){
                         client.disconnect();
-                        break;
+                    }
+                    break;
                 }
-            } else {
+            }
+            //if the command wasnt in Client.CHAT_COMMANDS it defaults to a BCST message.
+            if (bcst) {
                 sendThread.sendMessage("BCST " + message);
             }
         }
