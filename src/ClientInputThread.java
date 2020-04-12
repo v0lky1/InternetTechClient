@@ -70,7 +70,7 @@ public class ClientInputThread extends Thread {
                 }
                 if (!validCommand) System.out.println("UNKNOWN COMMAND: " + userCommand);
             } else {
-                sendThread.sendMessage("BCST " + message);
+                sendThread.sendMessage("BCST " +  message);
             }
         }
     }
