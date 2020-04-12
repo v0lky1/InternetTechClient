@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.Base64;
 
 public class ReceiveThread extends Thread {
 
@@ -152,6 +154,15 @@ public class ReceiveThread extends Thread {
                 //0 = group, 1 = username, 2 = message
                 System.out.println("<" + payload[0].toUpperCase() + ">" + " from [" + payload[1] + "]: " + payload[2]);
                 break;
+
+            case "RECEIVEFILE":
+                payload = misc.split(" ", 3);
+                // 0 = username, 1 = filename, 2 = bytearray in string format
+                System.out.println("Received file from " + payload[0] + " with filename: " + payload[1]);
+                byte[] file = Base64.getDecoder().decode(payload[2]);
+                client.retrieveFile(payload[1], file);
+                break;
+
             case "PING":
                 client.pingReceived();
                 break;

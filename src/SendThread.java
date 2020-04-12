@@ -66,6 +66,9 @@ public class SendThread extends Thread {
                 System.out.println("Attempting to join group with name <" + misc.toUpperCase() + ">");
                 break;
 
+            case "SENDFILE":
+                break;
+
         }
         writer.println(message);
         writer.flush();

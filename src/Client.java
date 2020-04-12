@@ -5,7 +5,7 @@ public class Client {
     private static final String SERVER_ADDRESS = "127.0.0.1";
     private static final int SERVER_PORT = 6969;
     //leaving BCST out of this one because it's being used in ClientInputThread as default.
-    public static final String[] CHAT_COMMANDS = {"DM", "RQST", "MAKE", "JOIN", "GRPMSG", "LEAVE", "KICK", "QUIT"};
+    public static final String[] CHAT_COMMANDS = {"DM", "RQST", "MAKE", "JOIN", "GRPMSG", "LEAVE", "KICK", "QUIT", "SENDFILE"};
 
     private ReceiveThread receiveThread;
     private SendThread sendThread;
@@ -84,5 +84,44 @@ public class Client {
 
     public boolean isStopped() {
         return stopped;
+    }
+
+    public byte[] getFileContents(String filename){
+        try {
+            File file = new File(filename);
+            FileInputStream fileInputStream = new FileInputStream(file);
+
+            System.out.println("Size in bytes: " + fileInputStream.available());
+
+            byte[] totalcontent = new byte[fileInputStream.available()];
+            int content;
+            int index = 0;
+            while ((content = fileInputStream.read()) != -1) {
+                totalcontent[index] = (byte)content;
+                index++;
+            }
+            return totalcontent;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void retrieveFile(String filename, byte[] contents){
+        try {
+            // Set the directory to "received"
+            File targetDirectory = new File("received");
+            targetDirectory.mkdir();
+            File targetFile = new File(targetDirectory, filename);
+
+            FileOutputStream fileOutputStream = new FileOutputStream(targetFile);
+
+            fileOutputStream.write(contents);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
