@@ -42,7 +42,7 @@ public class ReceiveThread extends Thread {
 
     public void handleIncomingMessage(String line) {
 
-        System.out.println("\tIN\t << " + line);
+        if (!line.equals("PING")) System.out.println("\tIN\t << " + line);
 
         String[] incomingLine = line.split(" ", 2);
 
